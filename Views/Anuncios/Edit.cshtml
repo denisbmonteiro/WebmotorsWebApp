@@ -1,0 +1,166 @@
+﻿@model WebmotorsWebApp.Models.Anuncio
+
+@{
+    ViewData["Title"] = "Editar";
+}
+
+<h1>Edite seu anúncio!</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Marca" class="control-label"></label>
+
+                <input type="hidden" id="nomeMarca" name="nomeMarca" value="@Model.Marca" />
+                <select asp-for="Marca" asp-items="@ViewBag.Marcas" class="form-control" onchange="getModelos();"></select>
+
+                <span asp-validation-for="Marca" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Modelo" class="control-label"></label>
+
+                <input type="hidden" id="nomeModelo" name="nomeModelo" value="@Model.Modelo" />
+                <select asp-for="Modelo" class="form-control" onchange="getVersoes();"></select>
+
+                <span asp-validation-for="Modelo" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Versao" class="control-label"></label>
+
+                <input type="hidden" id="nomeVersao" name="nomeVersao" value="@Model.Versao" />
+                <select asp-for="Versao" class="form-control" onchange="updateVersao();"></select>
+
+                <span asp-validation-for="Versao" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Ano" class="control-label"></label>
+                <input asp-for="Ano" class="form-control" />
+                <span asp-validation-for="Ano" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Quilometragem" class="control-label"></label>
+                <input asp-for="Quilometragem" class="form-control" />
+                <span asp-validation-for="Quilometragem" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Observacao" class="control-label"></label>
+                <input asp-for="Observacao" class="form-control" />
+                <span asp-validation-for="Observacao" class="text-danger"></span>
+            </div>
+            
+            <br/>
+
+            <div class="form-group">
+                <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+
+                <input type="submit" value="Salvar" class="btn btn-primary"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.onload = () => {
+        var ddMarca = document.getElementById("Marca");
+        var nomeMarca = document.getElementById("nomeMarca").value;
+
+        for (var i = 0; i < ddMarca.options.length; i++) {
+            if (ddMarca.options[i].text === nomeMarca) {
+                ddMarca.selectedIndex = i;
+                break;
+            }
+        }
+
+        getModelos();
+    };
+
+    function getModelos() {
+        var marca = document.getElementById("Marca");
+
+        var idMarca = marca.value;
+        var nomeMarca = marca.options[marca.selectedIndex].text;
+
+        $("#nomeMarca").val(nomeMarca);
+
+        $.ajax({
+            type: 'GET',
+            url: '/Anuncios/GetModelos?idMarca=' + idMarca,
+            contentType: 'json',
+            success: function (result) {
+                $('#Modelo').empty();
+
+                $.each(result, function (k, v) {
+                    $('<option>').val(v.value).text(v.text).appendTo('#Modelo');
+                });
+
+                var ddModelo = document.getElementById("Modelo");
+                var nomeModelo = document.getElementById("nomeModelo").value;
+
+                for (var i = 0; i < ddModelo.options.length; i++) {
+                    if (ddModelo.options[i].text === nomeModelo) {
+                        ddModelo.selectedIndex = i;
+                        break;
+                    }
+                }
+
+                getVersoes();
+            }
+        });
+    }
+
+    function getVersoes() {
+        var modelo = document.getElementById("Modelo");
+
+        var idModelo = modelo.value;
+        var nomeModelo = modelo.options[modelo.selectedIndex].text;
+
+        $("#nomeModelo").val(nomeModelo);
+
+        $.ajax({
+            type: 'GET',
+            url: '/Anuncios/GetVersoes?idModelo=' + idModelo,
+            contentType: 'json',
+            success: function (result) {
+                $('#Versao').empty();
+
+                $.each(result, function (k, v) {
+                    $('<option>').val(v.value).text(v.text).appendTo('#Versao');
+                });
+
+                var ddVersao = document.getElementById("Versao");
+                var nomeVersao = document.getElementById("nomeVersao").value;
+
+                for (var i = 0; i < ddVersao.options.length; i++) {
+                    if (ddVersao.options[i].text === nomeVersao) {
+                        ddVersao.selectedIndex = i;
+                        break;
+                    }
+                }
+
+                updateVersao();
+            }
+        });
+    }
+
+    function updateVersao() {
+        var versao = document.getElementById("Versao");
+
+        var nomeVersao = versao.options[versao.selectedIndex].text;
+
+        $("#nomeVersao").val(nomeVersao);
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
